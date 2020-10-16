@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# != 1 ]; then
+        echo "Usage: count <string>"
+else
+        echo "$1" > /tmp/count.tmp
+        countr=`cat /tmp/count.tmp | wc -m`
+        countr=$(($countr - 1))
+        echo $countr  
+fi

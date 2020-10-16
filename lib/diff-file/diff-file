@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# != 2 ]; then
+        echo -e "Usage: diff-file <file1> <file2>"
+else
+        echo -e "       $1      |       $2\n\n" > /tmp/diff-file.txt
+        diff -a --suppress-common-lines -y $1 $2 >> /tmp/diff-file.txt
+
+        echo -e "\e[1;32m [*]\e[0m Showing difference - Opening '/tmp/diff-file.txt'"
+        less /tmp/diff-file.txt
+fi

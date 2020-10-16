@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ $# != 2 ]; then
+	echo "Usage: repeat <string/letter> <times>"
+else
+	str=$1
+	num=$2
+	echo $(printf -v spaces '%*s' $num ''; printf '%s\n' ${spaces// /"$str"})
+fi
