@@ -263,22 +263,6 @@ def movelib():
     except:
         print(rew + err + "Could not implement" + text)
 
-#diff-file
-    text=" diff-file"
-    dir = "/usr/bin"
-    file = "diff-file"
-    print(rew + tsk + "Copying" + text)
-    dir = checkdir(dir)
-    checkfile(dir, file)
-    copy(lib + "diff-file/" + file, dir + file)
-    print(rew + suc + "Implemented" + text)
-    if loud:
-        print(inf + "Copied it to " + dir + file)
-    try:
-        pass
-    except:
-        print(rew + err + "Could not implement" + text)
-
 #w
     text=" w"
     dir = "/usr/bin"
@@ -302,7 +286,7 @@ def movelib():
     print(tsk + "Copying" + text)
     dir = checkdir(dir)
     checkfile(dir, file)
-    copy(lib + "dotfile/" + file, dir + file)
+    copy(lib + "dotfiles/" + file, dir + file)
     print(rew + suc + "Implemented" + text)
     if loud:
         print(inf + "Copied it to " + dir + file)

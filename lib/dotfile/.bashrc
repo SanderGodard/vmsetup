@@ -14,7 +14,7 @@ HISTCONTROL=ignoreboth
 HISTTIMEFORMAT="[%d/%m/%y %T] "
 # append to the history file, don't overwrite it
 shopt -s histappend
-shopt -o noclobber
+#shopt -o noclobber
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=10000
@@ -31,75 +31,8 @@ shopt -s checkwinsize
 # make less more friendly for non-text input files, see lesspipe(1)
 #[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
 
-# set a fancy prompt (non-color, unless we know we "want" color)
-case "$TERM" in
-    xterm-color) color_prompt=yes;;
-esac
-
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
-force_color_prompt=yes
-
-if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
-    else
-	color_prompt=
-    fi
-fi
-# export PROMPT_COMMAND="echo -n \[\$(date +%H:%M:%S)\]\ "
-if [ "$color_prompt" = yes ]; then
-	#Backup - PS1='${debian_chroot:+($debian_chroot)}\e[\033\]\e[01;31m\u\]\e[0m@\e[37m\H\]\[\033[00m\]:\[\033[01;34m\]\]\w\[\033[00m\] \$ '
-	#Backup 2 - PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u\[\033[00;00m\]@\[\033[01;0m\]\H\[\033[00m\]:\[\033[00;34m\]\w\[\033[00m\] \$ '
-	#PS1='${debian_chroot:+($debian_chroot)}\[\033[00;00m\]╭── \[\033[01;31m\]\u\[\033[00;00m\]@\[\033[01;0m\]\H\[\033[01;31m\]\[\033[00;00m\] ─── \[\033[00;34m\]\w\[\033[01;00m\] ─── \[\033[01;33m\]$(date +%H:%M)\n\[\033[00;00m\]╰─\$ '
-
-	#scriptttt
-	#sleep .01
-PS1='${debian_chroot:+($debian_chroot)}\
-\[\033[00;00m\]╭── \
-\[\033[01;31m\]\u\
-\[\033[00;00m\]@\
-\[\033[01;0m\]\H\
-\[\033[01;31m\]\[\033[00;00m\] ── \
-\[\033[00;34m\]\w\
-\[\033[01;00m\] \
-$(repeat " " \
-$(($(tput cols) - \
-$(count "$(id -un)'@'$(hostname)") - \
-$(count "$(dirs +0)") - \
-$(count "00:00") - 10))) \
-\[\033[01;95m\]$(date +%H:%M)\
-\n\
-\[\033[00;00m\]╰─\
-\[\033[01;34m\]\$\
-\[\033[00;00m\] '
-	# The script doesn't use an ordinary space. Dont delete this character " "
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\H:\w \$ '
-fi
-unset color_prompt force_color_prompt
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
-
-
-
-
+PS1=$(/bin/prompt)
 
 
 #			Scripts
@@ -132,7 +65,7 @@ copy() {
 }
 
 # cd and ls into same dir
-cl() {
+cdls() {
 	cd "$1"
 	ls
 }
@@ -148,6 +81,92 @@ qrScan() {
 	zbarimg $1 | cut -d ":" -f2
 }
 
+# Open image in new window (without error messages)
+see() {
+	eog $1 &> /dev/null
+}
+
+# Open other shit
+open() {
+	xdg-open $1 &> /dev/null
+}
+
+# Move things to their places
+#move() {
+#	i3-msg move container[class="Spotify$"] to workspace3
+#	i3-msg workspace1
+#
+#	wmctrl -r "Spotify Premium" -t 2
+#	wmctrl -r "Discord" -t 2
+#	wmctrl -r "Mozilla Firefox" -t 1
+#	wmctrl -r "erminal" -t 0
+#	wmctrl -s 1
+#	sleep 1
+#	wmctrl -s 0
+#}
+
+# Diff-file
+diff-file() {
+	diff -syT "$1" "$2" | less
+}
+
+# Get last file from download
+lastDownload() {
+	mv ~/Downloads/"$(ls -1t ~/Downloads/ | head -n1)" "$(pwd)"/.
+}
+
+# cat all files in dir
+catdir() {
+	arra="$(find)"
+	for i in $arra; do
+		if [[ -e $i && ! -d $i ]]; then
+			cat "$i"
+		fi
+	done
+}
+
+#Takes author as argument
+gitLinesByAuthor() {
+	git log --author="$1" --pretty=tformat: --numstat \
+	| gawk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s removed lines: %s total lines: %s\n", add, subs, loc }' -
+}
+
+# For every file in dir, do $@
+forEveryFileInDir() {
+	find . | while read line; do "$@" "$line"; done
+}
+
+# Shorthand reach into tools dir and get tool
+# Homemade autocomplete right here
+#ctftools() {
+#	if [ "$#" -lt 2 ]; then
+#		echo "$(ls ~/Documents/tools/$1)"
+#	else
+#		~/Documents/tools/"$1"/"$2" "$@"
+#	fi
+#}
+
+# This one uses good autocomplete that lies in /usr/share/bash-completion/completions/tools
+tools() {
+	echo "~/Documents/tools/$1/$2 ${@:3}"
+	~/Documents/tools/"$1"/"$2" "${@:3}"
+}
+
+# Spawn new terminal in same dir (WIP)
+#spawnHere() {
+#	tmpalac="/tmp/alacritty-tmp-last-pwd"
+#	echo -e "cd $(pwd)" > "$tmpalac"
+#	alacritty -e "$tmpalac" & disown -a
+#}
+
+# Spawn unicode pretty border making characters
+unicodeBorderChars() {
+	for i in 6a 6b 6c 6d 6e 71 74 75 76 77 78; do
+		printf "0x$i \x$i \x1b(0\x$i\x1b(B\n";
+	done
+
+}
+
 # Adds colors to LESS
 export LESS_TERMCAP_mb=$'\E[01;31mBold'
 export LESS_TERMCAP_md=$'\E[01;96m'
@@ -160,11 +179,29 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 # Tell LESS to normally use colors for ls and grep, ignore case, and see percentage through file
 export LESS="-iMR"
 
+# default editor
+export EDITOR='nano'
+
+# Timezone
+export TZ=Europe/Oslo
+
+# Default browser
+export BROWSER="/opt/google/chrome/google-chrome --profile-directory=Default"
 
 #alias wireguard-ecsc19-kill='wg-quick down wireguard/sander.conf'
 #alias wireguard-ecsc19='wg-quick up wireguard/sander.conf'
 #alias discord='discord --no-sandbox'
 #alias chrome='google-chrome --no-sandbox'
+
+
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -177,14 +214,17 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# default editor
-export EDITOR='nano'
-
-export TZ=Europe/Oslo
 
 # startup commands
+
 # Turns on numlock
 #setleds -D +num
+numlockx on
+
+# Language keymap
+setxkbmap no
+
+
 # Makes numpad . be .
 #xmodmap -e 'keycode 79 = 7 7'
 #xmodmap -e 'keycode 80 = 8 8'
@@ -200,65 +240,25 @@ export TZ=Europe/Oslo
 #xmodmap -e 'keycode 90 = 0 0'
 xmodmap -e 'keycode 91 = period period'
 
-numlockx on
+#cd
+#cd /home/sGodard/Documents/skole/ntnu/
+cd /home/sGodard/Documents/
+#cd /home/sGodard/Documents/skole/ntnu/informasjonsteknologi-tdt4109/inspera/eksamen
 
-clear
 
-sleep .2
-if (( $(tput cols) > 51 )) && (( $(tput lines) > 20 )); then
-	neofetch
-fi
-# ~/.bash_aliases
+#if (( $(ps aux | grep "startx" | grep -v -e "grep" | wc -l) < 1 )); then
+#	sleep 4; nmcli d s &
+#fi
 
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls -F -t --color=auto'
-    alias ll='ls -lhA -F -t --color=auto'
-    alias dir='dir --color=auto'
-    alias vdir='vdir --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
+#clear
 
-# some more aliases
-alias bashrc='nano ~/.bashrc'
-alias c='clear'
-alias cls='clear'
-alias cp='cp -r -i'
-alias deb='dpkg -i'
-alias dim='echo Terminal Dimensions: $(tput cols) columns x $(tput lines) rows'
-alias dir='dir --color=auto'
-alias discover='sudo netdiscover -i wlan0'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias grep='grep'
-alias ifconfig='ip address && echo -e "\nPublic IP address:" && myip'
-alias ll='ls -lahA -F -t --color=auto'
-alias ls='ls -A -F -t --color=auto'
-alias mkdir='mkdir -pv'
-alias mv='mv -i -v'
-alias myip='curl --silent https://ipecho.net/plain; echo'
-alias nano='nano -A -i -U -q'
-alias neo='neofetch'
-alias nmapHelp='nmap -sC -sV -A'
-alias ping='ping -c 5'
-alias pip='pip3'
-alias pip27='pip'
-alias pstree='pstree -C age -h'
-alias py3='python3'
-alias q='exit'
-alias r='ranger'
-alias rm='rm -v -I'
-alias search='echo "Husk at den søker gjennom dir du er i" && sudo find | grep'
-alias shutdown='sudo shutdown now'
-alias speedtest='speedtest-cli --simple'
-alias sqlinjection='sqlmap -r RAW_HEADER.TXT -p PARAM --tables --risk3 --level 5'
-alias sudi='sudo '
-alias sudo='sudo '
-alias sudp='sudo '
-alias suroot='sudo -E su -p'
-alias vdir='vdir --color=auto'
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-alias cal='ncal -w -b -M'
-alias sizeOfDir='du -sh'
+#sleep .2
+#if (( $(tput cols) > 51 )) && (( $(tput lines) > 20 )); then
+#	neofetch
+#fi
+
+
+# Java opplegg???
+export CLASSPATH=".:./*"
+export CLASSPATH="$CLASSPATH:/usr/share/java/junit.jar"
+export CLASSPATH="$CLASSPATH:../../../../src/main/java/*/*"
