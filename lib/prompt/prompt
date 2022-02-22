@@ -1,0 +1,109 @@
+#!/bin/bash
+
+#sleep .2
+
+left="false"
+
+# set a fancy prompt (non-color, unless we know we "want" color)
+case "$TERM" in
+    xterm-color) color_prompt=yes;;
+esac
+
+# uncomment for a colored prompt, if the terminal has the capability; turned
+# off by default to not distract the user: the focus in a terminal window
+# should be on the output of commands, not on the prompt
+force_color_prompt=yes
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
+    else
+	color_prompt=
+    fi
+fi
+
+# if (( $(tput cols) < 41)); then
+#
+# prompt='\[\033[00;00m\]╭─ \
+# \[\033[01;31m\]\u\
+# \[\033[00;00m\]@\
+# \[\033[01;0m\]\H\
+# \[\033[00;00m\] ── \
+# \[\033[01;95m\]$(date +%H:%M)\
+# \n\
+# \[\033[00;00m\]├ \
+# \[\033[00;34m\]\w\
+# \n\
+# \[\033[00;00m\]╰─\
+# \[\033[01;34m\]\$\
+# \[\033[00;00m\] '
+#
+# else
+# # elif (( $(tput cols) < 71)); then
+#
+# if [ "$left" = "true" ]; then
+#
+# prompt='\[\033[00;00m\]╭──| \
+# \[\033[01;95m\]$(date +%H:%M)\
+# \[\033[00;00m\] | \
+# \[\033[01;31m\]\u\
+# \[\033[00;00m\]@\
+# \[\033[01;0m\]\H\
+# \[\033[01;31m\]\[\033[00;00m\] ── \
+# \[\033[00;34m\]\w\
+# \n\
+# \[\033[00;00m\]╰─\
+# \[\033[01;34m\]\$\
+# \[\033[00;00m\] '
+#
+# else
+#
+# prompt='\[\033[00;00m\]╭── \
+# \[\033[01;31m\]\u\
+# \[\033[00;00m\]@\
+# \[\033[01;0m\]\H\
+# \[\033[01;31m\]\[\033[00;00m\] ── \
+# \[\033[00;34m\]\w\
+# \[\033[01;00m\] \
+# $(repeat " " \
+# $(($(tput cols) - \
+# $(count "$(id -un)'@'$(hostname)") - \
+# $(count "$(dirs +0)") - \
+# $(count "00:00") - 10))) \
+# \[\033[01;95m\]$(date +%H:%M)\
+# \n\
+# \[\033[00;00m\]╰─\
+# \[\033[01;34m\]\$\
+# \[\033[00;00m\] '
+#
+# fi
+#
+# fi
+
+
+prompt='\[\033[00;00m\]╭─ \
+\[\033[01;31m\]\u\
+\[\033[00;00m\]@\
+\[\033[01;0m\]\H\
+\[\033[00;00m\] ── \
+\[\033[01;95m\]$(date +%H:%M)\
+\n\
+\[\033[00;00m\]├ \
+\[\033[00;34m\]\w\
+\n\
+\[\033[00;00m\]╰─\
+\[\033[01;34m\]\$\
+\[\033[00;00m\] '
+
+
+if [ "$color_prompt" != yes ]; then
+	prompt=$(echo -e "\[\033[00;00m\]$prompt")
+	# prompt=${$(echo -e "$prompt")//\\/}
+	# prompt=${$(echo -e "\[\033[00;00m\]$prompt")//[/}
+	# prompt=${$(echo -e "$prompt")//]/}
+fi
+
+echo "$prompt"

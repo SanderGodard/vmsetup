@@ -32,7 +32,7 @@ shopt -s checkwinsize
 #[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 
-PS1=$(/bin/prompt)
+PS1=$(/usr/bin/prompt)
 
 
 #			Scripts
@@ -76,11 +76,6 @@ mkcd() {
 	cd "$1"
 }
 
-# Scan qr code with zbarimg
-qrScan() {
-	zbarimg $1 | cut -d ":" -f2
-}
-
 # Open image in new window (without error messages)
 see() {
 	eog $1 &> /dev/null
@@ -90,20 +85,6 @@ see() {
 open() {
 	xdg-open $1 &> /dev/null
 }
-
-# Move things to their places
-#move() {
-#	i3-msg move container[class="Spotify$"] to workspace3
-#	i3-msg workspace1
-#
-#	wmctrl -r "Spotify Premium" -t 2
-#	wmctrl -r "Discord" -t 2
-#	wmctrl -r "Mozilla Firefox" -t 1
-#	wmctrl -r "erminal" -t 0
-#	wmctrl -s 1
-#	sleep 1
-#	wmctrl -s 0
-#}
 
 # Diff-file
 diff-file() {
@@ -125,46 +106,9 @@ catdir() {
 	done
 }
 
-#Takes author as argument
-gitLinesByAuthor() {
-	git log --author="$1" --pretty=tformat: --numstat \
-	| gawk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s removed lines: %s total lines: %s\n", add, subs, loc }' -
-}
-
 # For every file in dir, do $@
 forEveryFileInDir() {
 	find . | while read line; do "$@" "$line"; done
-}
-
-# Shorthand reach into tools dir and get tool
-# Homemade autocomplete right here
-#ctftools() {
-#	if [ "$#" -lt 2 ]; then
-#		echo "$(ls ~/Documents/tools/$1)"
-#	else
-#		~/Documents/tools/"$1"/"$2" "$@"
-#	fi
-#}
-
-# This one uses good autocomplete that lies in /usr/share/bash-completion/completions/tools
-tools() {
-	echo "~/Documents/tools/$1/$2 ${@:3}"
-	~/Documents/tools/"$1"/"$2" "${@:3}"
-}
-
-# Spawn new terminal in same dir (WIP)
-#spawnHere() {
-#	tmpalac="/tmp/alacritty-tmp-last-pwd"
-#	echo -e "cd $(pwd)" > "$tmpalac"
-#	alacritty -e "$tmpalac" & disown -a
-#}
-
-# Spawn unicode pretty border making characters
-unicodeBorderChars() {
-	for i in 6a 6b 6c 6d 6e 71 74 75 76 77 78; do
-		printf "0x$i \x$i \x1b(0\x$i\x1b(B\n";
-	done
-
 }
 
 # Adds colors to LESS
@@ -181,18 +125,6 @@ export LESS="-iMR"
 
 # default editor
 export EDITOR='nano'
-
-# Timezone
-export TZ=Europe/Oslo
-
-# Default browser
-export BROWSER="/opt/google/chrome/google-chrome --profile-directory=Default"
-
-#alias wireguard-ecsc19-kill='wg-quick down wireguard/sander.conf'
-#alias wireguard-ecsc19='wg-quick up wireguard/sander.conf'
-#alias discord='discord --no-sandbox'
-#alias chrome='google-chrome --no-sandbox'
-
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
@@ -240,25 +172,90 @@ setxkbmap no
 #xmodmap -e 'keycode 90 = 0 0'
 xmodmap -e 'keycode 91 = period period'
 
-#cd
-#cd /home/sGodard/Documents/skole/ntnu/
-cd /home/sGodard/Documents/
-#cd /home/sGodard/Documents/skole/ntnu/informasjonsteknologi-tdt4109/inspera/eksamen
+cd ~/
 
 
-#if (( $(ps aux | grep "startx" | grep -v -e "grep" | wc -l) < 1 )); then
-#	sleep 4; nmcli d s &
-#fi
-
-#clear
-
-#sleep .2
-#if (( $(tput cols) > 51 )) && (( $(tput lines) > 20 )); then
-#	neofetch
-#fi
-
-
-# Java opplegg???
+# Java opplegg
 export CLASSPATH=".:./*"
 export CLASSPATH="$CLASSPATH:/usr/share/java/junit.jar"
 export CLASSPATH="$CLASSPATH:../../../../src/main/java/*/*"
+
+
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls -F -t --color=auto'
+    alias ll='ls -lhAS -F -t --color=auto'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+swpusage() {
+	for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done | sort -n -k2
+}
+
+
+# some more aliases
+alias aliases='nano ~/.bashrc'
+alias bashrc='nano ~/.bashrc'
+alias c='clear'
+alias cls='clear'
+alias cp='cp -r -i'
+alias deb='dpkg -i'
+alias dim='echo Terminal Dimensions: $(tput cols) columns x $(tput lines) rows'
+alias dir='dir --color=auto'
+alias discover='sudo netdiscover -i wlan0'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias ifconfig='ip -c address && echo -e "\nPublic IP address:" && myip'
+alias imageMagik='convert'
+alias ll='ls -lahA -F -t --color=auto'
+alias ls='ls -F -t --color=auto'
+alias la='ls -A -F -t --color=auto'
+alias metasploit='msfconsole'
+alias mkdir='mkdir -pv'
+alias mv='mv -i -v'
+alias myip='curl --silent https://ipecho.net/plain; echo'
+alias nano='nano -A -i -U -q'
+alias neo='neofetch'
+alias nmapHelp='nmap -sC -sV -A'
+alias o='xdg-open'
+alias ping='ping -c 5'
+alias pip='pip3'
+alias pip27='pip'
+alias pstree='pstree -C age -h'
+alias py3='python3'
+alias q='exit'
+alias r='ranger'
+alias reboot='sudo systemctl reboot'
+alias screenshot='maim --select -u "/home/$USER/Pictures/recent_screenshot.png"; notify-send "Screenshot taken"'
+alias search='echo "Husk at den søker gjennom dir du er i" && sudo find | grep'
+alias shutdown='sudo shutdown now'
+alias sqlinjection='sqlmap -r RAW_HEADER.TXT -p PARAM --tables --risk3 --level 5'
+alias sudi='sudo '
+alias sudo='sudo '
+alias sudp='sudo '
+alias suroot='sudo -E su -p'
+alias wifi='nmcli dev wifi'
+alias brightness-fix='xrandr --output eDP1 --brightness 1'
+alias brightness='xrandr --output eDP1 --brightness'
+alias battery="upower -i /org/freedesktop/UPower/devices/battery_BAT0"
+alias cal='cal -wm'
+alias sizeOfDir='du -sh'
+alias pythonserver='python3 -m http.server'
+alias refreshPrompt='PS1=$(/bin/prompt)'
+alias resetPrompt='PS1=$(/bin/prompt)'
+alias bluetoothStart='systemctl start bluetooth.service'
+alias less='less -S'
+alias javaoptions='nano /etc/environment'
+alias wordlist='echo "/usr/share/dirbuster/directory-list-2.3-medium.txt"'
+alias zip='zip -r'
+alias grepInDir='grep -r -n -I -i'
+alias nc='ncat'
+alias java16='/usr/lib/jvm/java-16-adoptopenjdk/bin/java'
+alias xxd='xxd -g 1'
+alias bluetoothConnectedDevices='bluetoothctl devices | cut -f2 -d" " | while read uuid; do bluetoothctl info $uuid; done|grep -e "Device\|Connected\|Name"'
+alias unmount='umount'
+alias rm='echo -e "Be careful! Use full path /usr/bin/rm to prove your intent"'
