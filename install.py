@@ -166,7 +166,16 @@ def runInstallation(args, home):
 	Config(args, name="w", endpoint="/usr/bin/", file="w", note="Watch system users activity").install()
 	Config(args, name="pip", endpoint="/usr/bin/", file="pip", note="Python installation service").install()
 	Config(args, name="ncat", endpoint="/usr/bin/", file="ncat", note="Networking tool").install()
-	system("/usr/bin/pip install termcolor")
+	Config(args, name="unzip", endpoint="/usr/bin/", file="unzip", note="To unzip shit").install()
+	Config(args, name="gobuster", endpoint="/usr/bin/", file="gobuster", note="Directory brute force machine").install()
+	Config(args, name="dirbust_list", endpoint=home, file="dirbust_list.txt", note="Directory name list").install()
+	Config(args, name="xclip", endpoint="/usr/bin/", file="xclip", note="Clipboard manager").install()
+	Config(args, name="setxkbmap", endpoint="/usr/bin/", file="setxkbmap", note="Keyboard language manager").install()
+	Config(args, name="numlockx", endpoint="/usr/bin/", file="numlockx", note="Numlock fix that goes with bashrc").install()
+	system("/usr/bin/pip install termcolor pwntools pycryptodome")
+
+
+	# Det under her blir for moon-landing
 	# Config(args, name="rofi-theme", endpoint="/usr/share/rofi/themes/", file="Moon.rasi", note="To select the rofi theme run 'rofi-theme-selector'").install()
 	# Config(args, name="rofi-config", endpoint=home + ".config/rofi/", file="config").install()
 	# Config(args, name="polybar", endpoint=home + ".config/", file="polybar/").install()
