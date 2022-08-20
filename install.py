@@ -1,5 +1,5 @@
 #!/bin/python3
-from os import get_terminal_size, path, scandir, remove, makedirs
+from os import get_terminal_size, path, scandir, remove, makedirs, system
 from shutil import copy, copytree, rmtree
 from termcolor import colored
 from platform import python_version
@@ -40,10 +40,10 @@ def art(termwidth):
 	smallmsg = "VMsetup | Make your VMs comfy"
 	a = """██╗   ██╗███╗   ███╗███████╗███████╗████████╗██╗   ██╗██████╗
 ██║   ██║████╗ ████║██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
-██║   ██║██╔████╔██║███████╗█████╗     ██║   ██║   ██║██████╔╝
-╚██╗ ██╔╝██║╚██╔╝██║╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
+██║   ██║██╔████╔██║███████╗█████╗	 ██║   ██║   ██║██████╔╝
+╚██╗ ██╔╝██║╚██╔╝██║╚════██║██╔══╝	 ██║   ██║   ██║██╔═══╝
  ╚████╔╝ ██║ ╚═╝ ██║███████║███████╗   ██║   ╚██████╔╝██║
-  ╚═══╝  ╚═╝     ╚═╝╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
+  ╚═══╝  ╚═╝	 ╚═╝╚══════╝╚══════╝   ╚═╝	╚═════╝ ╚═╝
 A small collection of scripts with a automatic install script,
 to help setup basic comfort in new temporary VMs"""
 # https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=Moon
@@ -164,6 +164,9 @@ def runInstallation(args, home):
 	Config(args, name="nmap", endpoint="/usr/bin/", file="nmap").install()
 	Config(args, name="vibeCheck", endpoint="/usr/bin/", file="vibeCheck", note="Custom nmap script").install()
 	Config(args, name="w", endpoint="/usr/bin/", file="w", note="Watch system users activity").install()
+	Config(args, name="pip", endpoint="/usr/bin/", file="pip", note="Python installation service").install()
+	Config(args, name="ncat", endpoint="/usr/bin/", file="ncat", note="Networking tool").install()
+	system("/usr/bin/pip install termcolor")
 	# Config(args, name="rofi-theme", endpoint="/usr/share/rofi/themes/", file="Moon.rasi", note="To select the rofi theme run 'rofi-theme-selector'").install()
 	# Config(args, name="rofi-config", endpoint=home + ".config/rofi/", file="config").install()
 	# Config(args, name="polybar", endpoint=home + ".config/", file="polybar/").install()
@@ -203,7 +206,7 @@ def main():
 	runInstallation(args, home)
 
 	print(m.info + "Remember to set new password on the machine with 'passwd'")
-    print(m.info + "Relay network connection back to local machine with 'sshuttle'")
+	print(m.info + "Relay network connection back to local machine with 'sshuttle'")
 
 
 	return
