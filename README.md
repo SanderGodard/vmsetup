@@ -4,3 +4,5 @@ A small collection of scripts with a automatic install script to help setup basi
 
 
 Need to rewrite the whole sshSetup script
+
+`sudo ./install.py`
