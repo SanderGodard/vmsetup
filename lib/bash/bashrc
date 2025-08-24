@@ -1,0 +1,103 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+
+# To get /etc/sudoers.lecture on each time you type password edit /etc/sudoers using root user
+
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# History control
+HISTCONTROL=ignoreboth # ignore duplicates, and starting with space
+HISTTIMEFORMAT="[%d/%m/%y %T] "
+# shopt -s histappend # append to the history file, don't overwrite it
+HISTSIZE=10000
+HISTFILESIZE=30000
+# shopt -s checkwinsize # check the window size after each command and, if necessary,  update the values of LINES and COLUMNS.
+
+# Java path fixing
+export CLASSPATH=".:./*"
+export CLASSPATH="$CLASSPATH:/usr/share/java/junit.jar"
+export CLASSPATH="$CLASSPATH:../../../../src/main/java/*/*"
+
+# Adds colors to LESS
+export LESS_TERMCAP_mb=$'\E[01;31mBold'
+export LESS_TERMCAP_md=$'\E[01;96m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[01;32m'
+export LESS="-iMR" # Tell LESS to normally use colors for ls and grep, ignore case, and see percentage through file
+
+# default editor
+export EDITOR='nano'
+
+# Timezone
+export TZ=Europe/Oslo
+
+# display, used for xwinrc 
+#export DISPLAY=lab-cli:0.0
+#export DISPLAY=$(grep nameserver /etc/resolv.conf | awk '{print $2}' | head -n 1):0.0
+export DISPLAY=:0
+
+# Set env vars for clipmenu
+export CM_LAUNCHER=rofi
+
+
+
+# enable programmable completion features (you dont need to enable  this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# if ! shopt -oq posix; then
+#   if [ -f /usr/share/bash-completion/bash_completion ]; then
+#     . /usr/share/bash-completion/bash_completion
+#   elif [ -f /etc/bash_completion ]; then
+#     . /etc/bash_completion
+#   fi
+# fi
+
+
+# Set colors to common commands
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls -F -t --color=auto'
+    alias ll='ls -lhAS -F -t --color=auto'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# Enable keyboard settings
+if [ {{keyboardSettings}} ]; then
+# Turns on numlock
+#setleds -D +num
+numlockx on
+
+# Set language keyboard mapping
+setxkbmap no
+
+# Makes numpad . be .
+xmodmap -e 'keycode 91 = period period'
+fi
+
+# Prompt control
+if [ {{overWritePrompt}} ]; then
+PS1=$(~/.prompt_script)
+fi
+
+# Alias definitions.
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# Extra functions
+if [ -f ~/.bash_functions ]; then
+    . ~/.bash_functions
+fi
+
+
+# Default cd
+cd {{cwd}} # Endres i ~/.dotfiles/.dotter/global.toml

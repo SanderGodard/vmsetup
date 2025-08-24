@@ -1,0 +1,174 @@
+#!/bin/bash
+# Self made script for a somewhat detailed nmap scan configuration with password search
+# Feel free to put the file directly in /bin/
+# $ mv nmapScan /bin/nmapScan
+# $chmod +x /bin/nmapScan
+# And that's all. Go ahead and use it
+
+userlist="/usr/share/wordlists/metasploit/default_users_for_services_unhash.txt"
+passwdlist="/usr/share/wordlists/rockyou.txt"
+#Change these wordlists to fit your case
+
+tmp="/tmp/vibeCheck.log"
+log="/tmp/logVibeChk_"
+#place="`pwd`"
+place="/bin"
+
+tit="\e[1;36m"
+
+tsk="\e[34m [ ]\e[0m"
+inf="\e[34m [i]\e[0m"
+suc="\e[32m [+]\e[0m"
+war="\e[33m [i]\e[0m"
+err="\e[31m [x]\e[0m"
+rew="\e[1A\e[2K"
+
+if (( $# < 1 )); then
+	echo -e " - Custom nmap configuration tool - "
+	echo -e "This tool is my own nmap configuration with built in credentials testing capabilities"
+	echo -e "You can change the -l parameters' lists by editing the variables in the top of this file, '$0'"
+	echo -e "You can not use both options at the same time!\n"
+        echo -e "Usage : vibeCheck [OPTION] <ip address> [ip address] ...\n"
+	echo -e "Options:"
+	echo -e "	-c, --creds	Looks for credentials open on the host(s) using ncrack\n				(Default passwordlist and usernamelist for ncrack)"
+	echo -e "	-l, --long	Looks for credentials open on the host(s) using ncrack with longer brute force lists\n				(passwordlist = $passwdlist)\n				(usernamelist = $userlist)"
+	echo -e "\nThe log is stored in '$tmp'\n"
+	type ncrack &> /dev/null || { echo -e "$war Ncrack needs to be installed to use the '-c' or '-l' flags\n$tsk Use 'apt install ncrack'"; }
+else
+
+        start=`date +%s`
+	credsOption="False"
+	credsOption2="False"
+        echo -e "" > "$tmp"
+
+
+	if (( $# > 1 )); then
+		if [[ "$1" =~ ^(-c|--creds)$ ]]; then
+			#shift $((OPTIND-1))
+			shift
+			credsOption="True"
+		elif [[ "$1" =~ ^(-l|--long)$ ]]; then
+			shift
+			credsOption="True"
+			credsOption2="True"
+		fi
+	fi
+
+	finish() {
+		parts=$(ls -1 /tmp/ | grep "logVibeChk_")
+		for p in $parts; do
+			cat "/tmp/$p" >> "$tmp"
+		done
+		echo -e "The log stored in '"$tmp"'" >> "$tmp"
+	        echo -e "" >> "$tmp"
+
+	        end=`date +%s`
+	        runtime=$((end-start))
+		if [[ "$interrupted" =~ ^(True)$ ]]; then
+	        	echo -e "$err Interrupted - $runtime s"
+		else
+	        	echo -e "$suc Done - $runtime s"
+		fi
+	        echo -e "$suc Opening report '"$tmp"'"
+	        less "$tmp"
+	}
+
+	type nmap &> /dev/null || { echo -e "$err Nmap needs to be installed \n$tsk Use 'apt install nmap'"; finish; exit 1; }
+
+	interrupted() {
+		interrupted="True"
+		#finish
+	}
+
+	credentials() {
+		type ncrack &> /dev/null || { echo -e "$err Ncrack needs to be installed to use the '-c' or '-l' flags\n$tsk Use 'apt install ncrack'"; finish; exit 1; }
+		section="Looking for open credentials"
+		echo -e "$tsk $section ..."
+
+	        echo -e "$tit POSSIBLE CREDENTIALS FOR $1" >> "$2"
+	        echo -e "\n" >> "$2"
+		if [[ "$credsOption2" =~ ^(True)$ ]]; then
+			credsScan=$(ncrack --passwords-first -v -P $passwdlist -U $userlist $1 -iX /tmp/thuroughScan.xml)
+			echo -e "$inf Using these wordlists:\n	usr: $userlist\n	pwd: $passwdlist"
+		else
+			credsScan=$(ncrack --passwords-first -v -iX /tmp/thuroughScan.xml)
+			echo -e "$inf Using default ncrack wordlists"
+		fi
+
+		echo -e "$credsScan" >> "$2"
+		echo -e "\n\n\n\n\n" >> "$2"
+		echo -e "$rew$suc $section"
+	}
+
+	nmapscan() {
+		echo -e "\e[1m - Nmap scan for $1 - "
+		section="Initial port scan"
+	        echo -e "$tit NMAP SCAN FOR $1\n" > "$2"
+	        echo -e "$tsk $section ..."
+		initialNmap=$(nmap $1)
+	        echo -e "$initialNmap" >> "$2"
+	        echo -e "\n\n\n\n\n" >> "$2"
+		echo -e "$rew$suc $section"
+		section="Finding details about services"
+	        echo -e "$tit THUROUGH SCAN FOR $1\n" >> "$2"
+	        echo -e "$tsk $section ..."
+		thuroughNmap=$(nmap -p- -sC -sV -A $1 -oX /tmp/thuroughScan.xml)
+	       	echo -e "$thuroughNmap" >> "$2"
+	        echo -e "\n\n\n\n\n" >> "$2"
+		echo -e "$tit Shorthand info about network" >> "$2"
+		echo -e "$rew$suc $section"
+	        prettySort "$2"
+	        echo -e "\n\n\n\n\n" >> "$2"
+	}
+
+	prettySort() {
+		breakda="False"
+		ips=$(sed -n -e '/THUROUGH/,$p' "$1" | grep -i "Nmap scan report for" | awk '{print $NF}')
+		for i in $ips; do
+			services=""
+			info=$(sed -n -e '/THUROUGH/,$p' "$1" | sed -n -e "/$i/,\$p" | sed -n -e '/STATE/,$p' | tail -n +2)
+			#echo "$info"
+			#echo -e "$info"
+			next="False"
+			for j in $info; do
+				if [[ "$j" = *"PORT"* ]]; then
+					breakda="True"
+					break
+				fi
+				if [[ "$next" = "True" ]]; then
+					ok=$(echo "$j" | awk '{print $NF}')
+					#echo "$ok"
+					services="$services$ok, "
+					next="False"
+				fi
+				if [[ "$j" = *"open"* ]] || [[ "$j" = *"filtered"* ]]; then
+					next="True"
+				fi
+			done
+			if [[ "$breakda" =~ ^(True)$ ]]; then
+				break
+				breakda="False"
+			fi
+			str="$i ($services)"
+			#old=", )"
+			#repl=")"
+			echo -e "$str" >> "$1"
+			#echo -e "$($str/$old/$repl)" >> "$1"
+		done
+	}
+
+	trap interrupted SIGHUP SIGINT SIGTERM
+
+	rm $log* || echo -e "$war Couldn't make sure previous temporary files were deleted. Check for $log manually!"
+	j=0
+	for i in $@; do
+		nmapscan "$i" "$log$j"
+		if [[ "$credsOption" =~ ^(True)$ ]]; then
+			credentials "$i" "$log$j"
+			echo -e ""
+		fi
+		j=$(($j+1))
+	done
+
+	finish
+fi

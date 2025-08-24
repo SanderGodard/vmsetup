@@ -1,0 +1,131 @@
+#!/usr/bin/bash
+
+# Scripts
+
+# Extracts files from compression
+extract () {
+   if [ -f $1 ] ; then
+       case $1 in
+           *.tar.bz2)   tar xvjf $1    ;;
+           *.tar.gz)    tar xvzf $1    ;;
+           *.bz2)       bunzip2 $1     ;;
+           *.rar)       unrar x $1     ;;
+           *.gz)        gunzip $1      ;;
+           *.tar)       tar xvf $1     ;;
+           *.tbz2)      tar xvjf $1    ;;
+           *.tgz)       tar xvzf $1    ;;
+           *.zip)       unzip $1       ;;
+           *.Z)         uncompress $1  ;;
+           *.7z)        7z x $1        ;;
+           *)           echo "don't know how to extract '$1'..." ;;
+       esac
+   else
+       echo "'$1' is not a valid file!"
+   fi
+}
+
+#copy file contents to clipboard
+copy() {
+	xclip -i $1 -selection clipboard
+}
+
+# cd and ls into same dir
+cdls() {
+	cd "$1"
+	ls
+}
+
+# Make dir then cd into it
+mkcd() {
+	mkdir -p "$1"
+	cd "$1"
+}
+
+# Open other shit
+open() {
+	xdg-open $1 &> /dev/null
+}
+
+# Diff-file
+diff-file() {
+	diff -syT "$1" "$2" | less
+}
+
+# Get last file from download
+lastDownload() {
+	mv ~/Downloads/"$(ls -1t ~/Downloads/ | head -n1 | sed 's/\**$//')" "$(pwd)"/.
+}
+
+# Get last file from screenshots
+lastScreenshot() {
+	mv /tmp/"$(ls -1t /tmp/) | head -n1 | sed 's/\**$//')" "$(pwd)"/.
+}
+
+# gcc compile and make exe
+compile() {
+	if [ "$#" != 1 ]; then
+		echo "usage: compile [file.c]"
+		return
+	fi
+	name="$(echo $1 | cut -d'.' -f1)"
+	gcc "$1" -o "$name"
+	if [ "$?" == 0; then
+		chmod +x "$name"
+		echo "$name compiled and is executable with './$name'"
+	fi
+}
+
+# For every file in dir, do $@
+forEveryFileInDir() {
+	find . | while read line; do "$@" "$line"; done
+}
+
+# Check which apps are using the swp memory
+swpusage() {
+	for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done | sort -n -k2
+}
+
+
+# Takes git repo author as argument
+gitLinesByAuthor() {
+	git log --author="$1" --pretty=tformat: --numstat \
+	| gawk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s removed lines: %s total lines: %s\n", add, subs, loc }' -
+}
+
+# Count letters in string
+count() {
+	if [ $# != 1 ]; then
+	        echo "Usage: count <string>"
+	else
+	        echo "$1" > /tmp/count.tmp
+	        countr=`cat /tmp/count.tmp | wc -m`
+	        rm /tmp/count.tmp 2>/dev/null
+	        countr=$(($countr - 1))
+	        echo $countr
+	fi
+}
+
+# cat all files in dir
+catdir() {
+	arra="$(find)"
+	for i in $arra; do
+		if [[ -e $i && ! -d $i ]]; then
+			cat "$i"
+		fi
+	done
+}
+
+# Tools shortcut, needs file in /usr/share/bash-completion/completions/tools
+tools() {
+	~/Documents/tools/"$1"/"$2" "${@:3}"
+}
+
+# Wifi config for those browser logins
+wificonfig() {
+	firefox "$(route -n | head -n3 | tail -n1 | awk '{print $2}')"
+}
+
+# Quickly jot down notes
+note() {
+	echo -e "\n$*" >> notes
+}

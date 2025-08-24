@@ -1,0 +1,22 @@
+[all]
+depends = ["bash", "style", "scripts"]
+
+[bash.files]
+"lib/bash/bashrc" = "~/.bashrc"
+"lib/bash/bash_aliases" = "~/.bash_aliases"
+"lib/bash/bash_functions" = "~/.bash_functions"
+"lib/bash/prompt_script" = "~/.prompt_script"
+
+[scripts.files]
+"lib/scripts/vibeCheck" = "/usr/bin/vibeCheck"
+
+[style.files]
+"lib/style/wp.jpg" = "~/Pictures/wp.jpg"
+"lib/style/lightdm-gtk-greeter.conf" = "/etc/lightdm/lightdm-gtk-greeter.conf"
+
+[bash.variables]
+cwd = "~/Documents/genesis"
+keyboardSettings = 1
+overWritePrompt = 1
+
+[settings]
