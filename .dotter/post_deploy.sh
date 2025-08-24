@@ -3,9 +3,9 @@
 # Post deployment script after using dotter
 
 # Set bash as default for terminal
-if [ "$SHELL" == "/usr/bin/zsh" ]; then # Likely kali box
+if [ "$SHELL" = "/usr/bin/zsh" ]; then # Likely kali box
     echo "/usr/bin/bash" >> ~/.zshrc
-elif [ "$SHELL" == "/usr/bin/bash" ]; then
+elif [ "$SHELL" = "/usr/bin/bash" ]; then
     echo "Using Bash as default"
 else
     for rc in $(find "$HOME" -wholename "$HOME/.*rc"); do
@@ -18,7 +18,7 @@ monitor=$(xfconf-query --channel xfce4-desktop --list | grep -i last-image | gre
 xfconf-query -c xfce4-desktop -p "$monitor" -s "$HOME"/Pictures/wp.jpg
 
 # Keyboard settings
-xsetkbmap no
+setxkbmap no
 
 # Message to user
 echo -e "Install:\nranger\nhtop\ntodo"
