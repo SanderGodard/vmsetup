@@ -23,5 +23,7 @@ setxkbmap no
 # Message to user
 echo -e "Install:\nranger\nhtop\ntodo"
 
+chmod +x ~/.prompt_script
+
 # Opening bash
 bash

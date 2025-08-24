@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/bash
 
-left="false"
+# left="false"
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
@@ -26,13 +26,15 @@ fi
 ### CHECK IF ROOT
 if [[ $EUID -eq 0 ]]; then # Running script as root
 
-timeColor='\[\033[01;31m\]'
-accentColor='\[\033[00;31m\]'
+time='\[\033[01;31m\]$(date +%H:%M)'
+pwd='\[\033[00;31m\]\w'
+prompt='\[\033[00;31m\]\$'
 
 else
 
-timeColor='\[\033[01;95m\]'
-accentColor='\[\033[00;34m\]'
+time='\[\033[01;95m\]$(date +%H:%M)'
+pwd='\[\033[00;34m\]\w'
+prompt='\[\033[00;34m\]\$'
 
 fi
 
@@ -42,20 +44,20 @@ else
 	status='\[\033[00;00m\] ── \[\033[01;31m\]$?\n'
 fi
 # ㉿
-prompt='\[\033[00;00m\]╭─ \
+prompt="\[\033[00;00m\]╭─ \
 \[\033[01;31m\]\u\
 \[\033[00;00m\]@\
 \[\033[01;0m\]\H\
 \[\033[00;00m\] ── \
-$timeColor$(date +%H:%M)\
+$time\
 $status\
 \n\
 \[\033[00;00m\]├ \
-$accentColor\w\
+$pwd\
 \n\
 \[\033[00;00m\]╰─\
-$accentColor\$\
-\[\033[00;00m\] '
+$prompt\
+\[\033[00;00m\] "
 
 # if [ "$color_prompt" != yes ]; then
 # 	prompt=$(echo -e "\[\033[00;00m\]$prompt")
