@@ -1,3 +1,7 @@
 [symlinks]
+"lib/bash/bash_aliases" = "/home/kali/.bash_aliases"
+"lib/bash/bash_functions" = "/home/kali/.bash_functions"
+"lib/bash/prompt_script" = "/home/kali/.prompt_script"
 
 [templates]
+"lib/bash/bashrc" = "/home/kali/.bashrc"
