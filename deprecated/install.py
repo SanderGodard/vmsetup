@@ -163,6 +163,7 @@ def runInstallation(args, home):
 	Config(args, name="bashrc", endpoint=home, file=".bashrc").install()
 	# Config(args, name="nmap", endpoint="/usr/bin/", file="nmap").install()
 	Config(args, name="vibeCheck", endpoint="/usr/bin/", file="vibeCheck", note="Custom nmap script").install()
+	Config(args, name="networkDiscovery", endpoint="/usr/bin/", file="vibeCheck", note="Custom nmap script").install()
 	Config(args, name="w", endpoint="/usr/bin/", file="w", note="Watch system users activity").install()
 	Config(args, name="pip", endpoint="/usr/bin/", file="pip", note="Python installation service").install()
 	Config(args, name="ncat", endpoint="/usr/bin/", file="ncat", note="Networking tool").install()

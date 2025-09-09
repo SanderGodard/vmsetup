@@ -9,6 +9,7 @@ depends = ["bash", "style", "scripts"]
 
 [scripts.files]
 "lib/scripts/vibeCheck" = "/usr/bin/vibeCheck"
+"lib/scripts/networkDiscovery.sh" = "/usr/bin/networkDiscovery"
 
 [style.files]
 "lib/style/wp.jpg" = "~/Pictures/wp.jpg"
