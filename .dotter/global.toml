@@ -16,7 +16,7 @@ depends = ["bash", "style", "scripts"]
 "lib/style/lightdm-gtk-greeter.conf" = "/etc/lightdm/lightdm-gtk-greeter.conf"
 
 [bash.variables]
-cwd = "~/Documents/genesis"
+cwd = "~/Documents"
 keyboardSettings = 1
 overWritePrompt = 1
 
