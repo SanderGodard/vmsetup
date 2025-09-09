@@ -19,6 +19,7 @@ xfconf-query -c xfce4-desktop -p "$monitor" -s "$HOME"/Pictures/wp.jpg
 
 # Keyboard settings
 setxkbmap no
+localectl set-x11-keymap no # Asks for system to input password
 
 # Message to user
 echo -e "Install:\nranger\nhtop\ntodo"

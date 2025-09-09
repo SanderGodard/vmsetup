@@ -1,5 +1,6 @@
 [all]
-depends = ["bash", "style", "scripts"]
+depends = ["bash"]
+#depends = ["bash", "style", "scripts"]
 
 [bash.files]
 "lib/bash/bashrc" = "~/.bashrc"
