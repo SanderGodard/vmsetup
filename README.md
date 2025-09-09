@@ -5,8 +5,11 @@ Using dotter to deploy bashrc and basic comfort in new temporary VMs
 ## Install:
 Check `.dotter/global.toml` for settings
 
-Edit:
+Edit the following:
 ```md
+[all]
+depends = ["bash", "style", "scripts"]
+
 [bash.variables]
 cwd = "~/Documents/genesis"
 ```
