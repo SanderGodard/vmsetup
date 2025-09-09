@@ -25,6 +25,7 @@ https://github.com/SuperCuber/dotter
  - LightDM Greeter styling
  - Scripts
     - VibeCheck
+    - NetworkDiscovery
 
 ---------------------
 
