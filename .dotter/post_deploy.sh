@@ -37,5 +37,8 @@ chmod +x ~/.prompt_script
 echo "Using ./generate-symlinks.sh to fix symlinks that dotter cannot"
 $(./generate-symlinks.sh) 2> /dev/null
 
+echo "Remember to update and upgrade"
+
+echo "[-] Opening bash" 
 # Opening bash
 bash
