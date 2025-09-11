@@ -68,7 +68,7 @@ stealthyScan() {
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
 		logname="$hostip""_stealthy""$logSuffix"
-		output=$(nmap "$host" -T1 -sS -oN "$logname")
+		output=$(nmap "$host" --top-ports 50 -T2 -sS -oN "$logname")
 		echo -e "$info""Outputting log: $logname"
 	done <<< "$hostsResult"
 }
