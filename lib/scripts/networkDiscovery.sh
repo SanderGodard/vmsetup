@@ -18,7 +18,7 @@ discovery() {
 	count=$(echo "$hostsResult" | wc -l)
 	echo -e "$info""Found $count targets"
 
-	echo -e "" > "$targets"
+	if [[ -f "$targets" ]]; then rm "$targets"; fi
 	while IFS= read -r host; do
 		echo -e "$host" >> "$targets"
 	done <<< "$hostsResult"
