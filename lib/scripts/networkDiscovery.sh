@@ -64,6 +64,16 @@ detailedScan() {
 	done <<< "$hostsResult"
 }
 
+stealthScan() {
+	echo -e "$task""Running STEALTHY portscan"
+	while IFS= read -r host; do
+		hostip=$(echo "$host" | tr '.' '_')
+		logname="$hostip""_stealthy""$logSuffix"
+		output=$(nmap "$host" -T1 -sS -oN "$logname")
+		echo -e "$info""Outputting log: $logname"
+	done <<< "$hostsResult"
+}
+
 usage() {
 	echo -e "Usage: $(basename $0) [OPTIONS] <IP-address or range> [IP-address or range]"
 	echo -e "Script for efficiently running host discovery, and running standardized nmap port scans"
@@ -73,6 +83,7 @@ usage() {
 	echo -e "  -o, --osscan		Perform OS scan"
 	echo -e "  -q, --quickscan	Perform quick NMAP scan for overview while doing detailed scan"
 	echo -e "  -d, --detailedscan	Perform detailed NMAP scan to avoid missing any services running"
+	echo -e "  -s, --stealthyscan	Perform stealthy NMAP scan to avoid detection at the cost of time"
 	echo -e "  -r, --readlog	Automatically open quickscan log of finished scans with 'less'"
 	echo -e ""
 	echo -e "Example:"
@@ -85,6 +96,7 @@ main() {
 	doOSScan=0
 	doQuickScan=0
 	doDetailedScan=0
+	doStealthyScan=0
 	doReadLog=0
 	ips=()
 
@@ -93,6 +105,7 @@ main() {
 	    -o|--osscan) doOSScan=1 ;;
 	    -q|--quickscan) doQuickScan=1 ;;
 	    -d|--detailedscan) doDetailedScan=1 ;;
+	    -s|--stealthyscan) doStealthyScan=1 ;;
 	    -r|--readlog) doReadLog=1 ;;
 	    *)  ips+=("$1") ;;
 	    esac
@@ -116,6 +129,9 @@ main() {
 	fi
 	if [[ $doDetailedScan == 1 ]]; then
 		detailedScan
+	fi
+	if [[ $doStealthyScan == 1 ]]; then
+		stealthyScan
 	fi
 	if [[ $doReadLog == 1 && $doQuickScan == 1 ]]; then
 		less "$fastlogname"
