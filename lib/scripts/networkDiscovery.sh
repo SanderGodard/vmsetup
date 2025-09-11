@@ -30,8 +30,7 @@ unset targetsOverview
 OSScan() {
 	echo -e "$task""Getting OS information"
 	while IFS= read -r host; do
-		echo -e "$host" >> "$targets"
-		osscan=$(nmap "$host" -O -T5 -F)
+		osscan=$(nmap "$host" -O --top-ports=20 -F --osscan-guess)
 #		filter=$(echo "$osscan" | grep OS | grep -v -e cpe | cut -d: -f2 | cut -d')' -f1 | head -n 1)
 		filter=$(echo "$osscan" | grep -e OS -e HOST | grep -v -e cpe -e nmap | cut -d: -f2- | cut -d')' -f1 | head -n 1)
 		hostOS="$host\t$filter"")"
@@ -142,7 +141,7 @@ main() {
 
 
 if [[ "$#" -lt 1 || "$*" == *"-h"* ]]; then
-	usage "$@"
+	usage $@
 else
-	main "$@"
+	main $@
 fi
