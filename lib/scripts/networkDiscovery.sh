@@ -64,7 +64,7 @@ detailedScan() {
 	done <<< "$hostsResult"
 }
 
-stealthScan() {
+stealthyScan() {
 	echo -e "$task""Running STEALTHY portscan"
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
