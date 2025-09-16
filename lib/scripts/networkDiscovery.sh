@@ -11,6 +11,24 @@ info="$blue""[i]""$normal"" "
 task="[*] "
 
 # Functions
+usage() {
+	echo -e "Usage: $(basename $0) [OPTIONS] <IP-address or range> [IP-address or range]"
+	echo -e "Script for efficiently running host discovery, and running standardized nmap port scans"
+	echo -e ""
+	echo -e "Options:"
+	echo -e "  -h, --help, -?	Display this help message and exit"
+	echo -e "  -o, --osscan		Perform OS scan"
+	echo -e "  -q, --quickscan	Perform quick NMAP scan for overview while doing detailed scan"
+	echo -e "  -d, --detailedscan	Perform detailed NMAP TCP standard scan to look for common services"
+	echo -e "  -u, --udpscan	Perform detailed NMAP UDP scan to avoid missing any UDP running (beware of false positives)"
+	echo -e "  -s, --stealthyscan	Perform stealthy NMAP scan to avoid detection at the cost of time"
+	echo -e "  -r, --readlog	Automatically open quickscan log of finished scans with 'less'"
+	echo -e ""
+	echo -e "Example:"
+	echo -e "  $(basename $0) -o -q -r 10.129.22.228"
+	exit
+}
+
 discovery() {
 	echo -e "$task""Discovering alive targets"
 	#hostsResult=$(fping -ganq $1)
@@ -54,11 +72,21 @@ quickScan() {
 }
 
 detailedScan() {
-	echo -e "$task""Running DETAILED portscan"
+	echo -e "$task""Running DETAILED TCP portscan"
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
 		logname="$hostip""$logSuffix"
-		output=$(nmap "$host" -T4 -p- -sV -sC -A -oN "$logname")
+		output=$(nmap "$host" -T4 -p- -sV -sC -A --append-output -oN "$logname")
+		echo -e "$info""Outputting log: $logname"
+	done <<< "$hostsResult"
+}
+
+udpScan() {
+	echo -e "$task""Running DETAILED UDP portscan"
+	while IFS= read -r host; do
+		hostip=$(echo "$host" | tr '.' '_')
+		logname="$hostip""$logSuffix"
+		output=$(nmap "$host" -T4 -p- -sU --append-output -oN "$logname")
 		echo -e "$info""Outputting log: $logname"
 	done <<< "$hostsResult"
 }
@@ -67,28 +95,12 @@ stealthyScan() {
 	echo -e "$task""Running STEALTHY portscan"
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
-		logname="$hostip""_stealthy""$logSuffix"
-		output=$(nmap "$host" --top-ports 50 -T2 -sS -oN "$logname")
+		logname="$hostip""$logSuffix"
+		output=$(nmap "$host" --top-ports 50 -T2 -sS --append-output -oN "$logname")
 		echo -e "$info""Outputting log: $logname"
 	done <<< "$hostsResult"
 }
 
-usage() {
-	echo -e "Usage: $(basename $0) [OPTIONS] <IP-address or range> [IP-address or range]"
-	echo -e "Script for efficiently running host discovery, and running standardized nmap port scans"
-	echo -e ""
-	echo -e "Options:"
-	echo -e "  -h, --help, -?	Display this help message and exit"
-	echo -e "  -o, --osscan		Perform OS scan"
-	echo -e "  -q, --quickscan	Perform quick NMAP scan for overview while doing detailed scan"
-	echo -e "  -d, --detailedscan	Perform detailed NMAP scan to avoid missing any services running"
-	echo -e "  -s, --stealthyscan	Perform stealthy NMAP scan to avoid detection at the cost of time"
-	echo -e "  -r, --readlog	Automatically open quickscan log of finished scans with 'less'"
-	echo -e ""
-	echo -e "Example:"
-	echo -e "  $(basename $0) -o -q -r 10.129.22.228"
-	exit
-}
 
 main() {
 	# ArgParsing
@@ -104,6 +116,7 @@ main() {
 	    -o|--osscan) doOSScan=1 ;;
 	    -q|--quickscan) doQuickScan=1 ;;
 	    -d|--detailedscan) doDetailedScan=1 ;;
+	    -u|--udpscan) doUDPScan=1 ;;
 	    -s|--stealthyscan) doStealthyScan=1 ;;
 	    -r|--readlog) doReadLog=1 ;;
 	    *)  ips+=("$1") ;;
@@ -128,6 +141,9 @@ main() {
 	fi
 	if [[ $doDetailedScan == 1 ]]; then
 		detailedScan
+	fi
+	if [[ $doUDPScan == 1 ]]; then
+		udpScan
 	fi
 	if [[ $doStealthyScan == 1 ]]; then
 		stealthyScan
