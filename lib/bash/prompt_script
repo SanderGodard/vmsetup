@@ -1,69 +1,117 @@
 #!/usr/bin/bash
 
-# left="false"
+# Color definitions
+# See 'man console_codes' for more details
+# Format: \[ \e[<style>;<fg_color>;<bg_color>m \]
+RED='\[\e[1;31m\]' # Bold Red
+GREEN='\[\e[1;32m\]' # Bold Green
+BLUE='\[\e[1;34m\]' # Bold Blue
+YELLOW='\[\e[1;33m\]' # Bold Yellow
+PURPLE='\[\e[1;35m\]' # Bold Purple
+CYAN='\[\e[1;36m\]' # Bold Cyan
+NC='\[\e[0m\]' # No Color (reset)
+
+# Special characters
+CHECKMARK="${GREEN}\342\234\223${NC}" # UTF-8 checkmark (✓)
+CROSSMARK="${RED}\342\234\227${NC}" # UTF-8 crossmark (✗)
+
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-    xterm-color) color_prompt=yes;;
+	xterm-color) color_prompt=yes;;
 esac
-
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
 force_color_prompt=yes
-
 if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
-    else
-	color_prompt=
-    fi
+	if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+		# We have color support; assume it's compliant with Ecma-48
+		# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+		# a case would tend to support setf rather than setaf.)
+		color_prompt=yes
+	else
+		color_prompt=
+	fi
 fi
 
-### CHECK IF ROOT
-if [[ $EUID -eq 0 ]]; then # Running script as root
 
-time='\[\033[01;31m\]$(date +%H:%M)'
-pwd='\[\033[00;31m\]\w'
-prompt='\[\033[00;31m\]\$'
+# Returns the current branch and repository status (if any)
+parse_git_branch() {
+	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
 
-else
+# This function is executed just before the prompt is displayed.
+update_prompt_status() {
+	local EXIT_STATUS=$? # Capture the exit status of the *previous* command
+	# 1. Error Status Check
+	if [[ $EXIT_STATUS != 0 ]]; then
+		ERROR_STATUS_INDICATOR="${RED}ERROR: $EXIT_STATUS${NC}\n"
+	else
+		# Optional: Display a checkmark/crossmark based on success/failure
+		# If you prefer to show nothing on success, set this to ""
+		ERROR_STATUS_INDICATOR="" # For this example, only show 'ERROR' on failure
+	fi
+}
 
-time='\[\033[01;95m\]$(date +%H:%M)'
-pwd='\[\033[00;34m\]\w'
-prompt='\[\033[00;34m\]\$'
+checkWidth() {
+	local T_COLS=$(tput cols) # Get current terminal width
+	local WIDTH_THRESHOLD=25 # The column limit for switching prompts
+	# 2. Terminal Width Check (The BODY of the prompt)
+	# Define your short and long prompt bodies
+	if [[ "$T_COLS" -lt "$WIDTH_THRESHOLD" ]]; then
+		PROMPT_WIDTH_SHORT="TRUE"
+	else
+		PROMPT_WIDTH_SHORT="FALSE"
+	fi
+}
 
-fi
+gitStatus() {
+	# 3. Git Status
+	GIT_BRANCH_STATUS=$(parse_git_branch)
+	if [[ -n "$GIT_BRANCH_STATUS" ]]; then
+		if [[ "$PROMPT_WIDTH_SHORT" == "TRUE" ]]; then
+			local PREFIX="\n├ "
+		else
+			local PREFIX=" ── "
+		fi
+		GIT_SECTION="${PREFIX}${YELLOW}git${NC} ${GREEN}${GIT_BRANCH_STATUS}${NC}"
+	else
+		GIT_SECTION=""
+	fi
+}
 
-if [ $? == 0 ]; then
-	status=""
-else
-	status='\[\033[00;00m\] ── \[\033[01;31m\]$?\n'
-fi
-# ㉿
-prompt="\[\033[00;00m\]╭─ \
-\[\033[01;31m\]\u\
-\[\033[00;00m\]@\
-\[\033[01;0m\]\H\
-\[\033[00;00m\] ── \
-$time\
-$status\
-\n\
-\[\033[00;00m\]├ \
-$pwd\
-\n\
-\[\033[00;00m\]╰─\
-$prompt\
-\[\033[00;00m\] "
+setUserColor() {
+	### CHECK IF ROOT
+	if [[ $EUID -eq 0 ]]; then # Running script as root
+		TIMECOLOR=$CYAN
+		PWDCOLOR=$CYAN
+		PROMPTCOLOR=$RED
+	else
+		TIMECOLOR=$PURPLE
+		PWDCOLOR=$BLUE
+		PROMPTCOLOR=$BLUE
+	fi
+}
 
-# if [ "$color_prompt" != yes ]; then
-# 	prompt=$(echo -e "\[\033[00;00m\]$prompt")
-# 	# prompt=${$(echo -e "$prompt")//\\/}
-# 	# prompt=${$(echo -e "\[\033[00;00m\]$prompt")//[/}
-# 	# prompt=${$(echo -e "$prompt")//]/}
-# fi
+generatePromptBody() {
+	if [[ "$PROMPT_WIDTH_SHORT" == "TRUE" ]]; then
+		PROMPT_BODY="\n├ ${TIMECOLOR}\t${NC}${GIT_SECTION}\n├ ${PWDCOLOR}\W${NC}"
+	else
+		PROMPT_BODY=" ── ${TIMECOLOR}\t${NC}${GIT_SECTION}\n├ ${PWDCOLOR}\w${NC}"
+	fi
+}
 
-echo "$prompt"
+# Assign the function to PROMPT_COMMAND
+update_prompt_status
+setUserColor
+checkWidth
+gitStatus
+generatePromptBody
+
+# Final PS1 Construction
+					      # ㉿
+PS1="${ERROR_STATUS_INDICATOR}╭─ ${RED}\u${NC}@\H${PROMPT_BODY}\n╰─${PROMPTCOLOR}\$${NC} "
+
+PROMPT_COMMAND="source ~/.prompt_script"
+
