@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+# Capture the exit status of the *previous* command
+EXIT_STATUS=$?
+
+
 # Color definitions
 # See 'man console_codes' for more details
 # Format: \[ \e[<style>;<fg_color>;<bg_color>m \]
@@ -41,12 +45,18 @@ parse_git_branch() {
 	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
 }
 
+# Get shell level
+parse_shell_level() {
+	if [ $SHLVL -gt 1 ]; then
+		SHELL_LEVEL_SECTION="\n├ shell lvl: ${SHLVL}"
+	fi
+}
+
 # This function is executed just before the prompt is displayed.
 update_prompt_status() {
-	local EXIT_STATUS=$? # Capture the exit status of the *previous* command
 	# 1. Error Status Check
-	if [[ $EXIT_STATUS != 0 ]]; then
-		ERROR_STATUS_INDICATOR="${RED}ERROR: $EXIT_STATUS${NC}\n"
+	if [ $EXIT_STATUS -ne 0 ]; then
+		ERROR_STATUS_INDICATOR="─${CROSSMARK} ${RED}Error status: $EXIT_STATUS${NC}\n├"
 	else
 		# Optional: Display a checkmark/crossmark based on success/failure
 		# If you prefer to show nothing on success, set this to ""
@@ -56,7 +66,7 @@ update_prompt_status() {
 
 checkWidth() {
 	local T_COLS=$(tput cols) # Get current terminal width
-	local WIDTH_THRESHOLD=25 # The column limit for switching prompts
+	local WIDTH_THRESHOLD=40 # The column limit for switching prompts
 	# 2. Terminal Width Check (The BODY of the prompt)
 	# Define your short and long prompt bodies
 	if [[ "$T_COLS" -lt "$WIDTH_THRESHOLD" ]]; then
@@ -75,9 +85,19 @@ gitStatus() {
 		else
 			local PREFIX=" ── "
 		fi
-		GIT_SECTION="${PREFIX}${YELLOW}git${NC} ${GREEN}${GIT_BRANCH_STATUS}${NC}"
+		GIT_SECTION="${PREFIX}git ${YELLOW}${GIT_BRANCH_STATUS}${NC}"
 	else
 		GIT_SECTION=""
+	fi
+}
+
+venvStatus() {
+	# 4. Venv Status
+	if [[ -n "$VIRTUAL_ENV" ]]; then
+		local VENV_NAME=$(basename $VIRTUAL_ENV)
+		VENV_SECTION="\n├ venv (${VENV_NAME})"
+	else
+		VENV_SECTION=""
 	fi
 }
 
@@ -96,9 +116,9 @@ setUserColor() {
 
 generatePromptBody() {
 	if [[ "$PROMPT_WIDTH_SHORT" == "TRUE" ]]; then
-		PROMPT_BODY="\n├ ${TIMECOLOR}\t${NC}${GIT_SECTION}\n├ ${PWDCOLOR}\W${NC}"
+		PROMPT_BODY="\n├ ${TIMECOLOR}\t${NC}${GIT_SECTION}${VENV_SECTION}\n├ ${PWDCOLOR}\W${NC}${SHELL_LEVEL_SECTION}"
 	else
-		PROMPT_BODY=" ── ${TIMECOLOR}\t${NC}${GIT_SECTION}\n├ ${PWDCOLOR}\w${NC}"
+		PROMPT_BODY=" ── ${TIMECOLOR}\t${NC}${GIT_SECTION}${VENV_SECTION}\n├ ${PWDCOLOR}\w${NC}${SHELL_LEVEL_SECTION}"
 	fi
 }
 
@@ -106,12 +126,14 @@ generatePromptBody() {
 update_prompt_status
 setUserColor
 checkWidth
+parse_shell_level
 gitStatus
+venvStatus
 generatePromptBody
 
 # Final PS1 Construction
 					      # ㉿
-PS1="${ERROR_STATUS_INDICATOR}╭─ ${RED}\u${NC}@\H${PROMPT_BODY}\n╰─${PROMPTCOLOR}\$${NC} "
+PS1="╭${ERROR_STATUS_INDICATOR}─ ${RED}\u${NC}@\H${PROMPT_BODY}\n╰─${PROMPTCOLOR}\$${NC} "
 
 PROMPT_COMMAND="source ~/.prompt_script"
 
