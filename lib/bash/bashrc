@@ -85,7 +85,7 @@ fi
 
 # Prompt control
 if [ {{overWritePrompt}} ]; then
-PS1=$(~/.prompt_script)
+source ~/.prompt_script
 fi
 
 # Alias definitions.
