@@ -86,7 +86,7 @@ udpScan() {
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
 		logname="$hostip""$logSuffix"
-		output=$(nmap "$host" -T4 -p- -sU --append-output -oN "$logname")
+		output=$(nmap "$host" -T4 -p53,47,48,88,123,137,161,514 -sU -sV --append-output -oN "$logname")
 		echo -e "$info""Outputting log: $logname"
 	done <<< "$hostsResult"
 }
