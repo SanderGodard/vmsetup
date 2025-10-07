@@ -1,14 +1,14 @@
 #!/usr/bin/bash
 
 # Setting globals
-targets="targets.lst"
+TARGETS="targets.lst"
 logSuffix="_scan.log"
 
-blue="\e[34m"
-normal="\e[0m"
-heading="\e[1;36m"
-info="$blue""[i]""$normal"" "
-task="[*] "
+BLUE="\e[34m"
+NC="\e[0m"
+HEADING="\e[1;36m"
+INFO="${BLUE}[i]${NC} "
+TASK="[*] "
 
 # Functions
 usage() {
@@ -30,23 +30,23 @@ usage() {
 }
 
 discovery() {
-	echo -e "$task""Discovering alive targets"
+	echo -e "${TASK}Discovering alive targets"
 	#hostsResult=$(fping -ganq $1)
 	hostsResult=$(nmap -sn -T4 "$@" | grep "Nmap scan report for" | awk '{print $NF}')
 	count=$(echo "$hostsResult" | wc -l)
-	echo -e "$info""Found $count targets"
+	echo -e "${INFO}}Found $count targets"
 
-	if [[ -f "$targets" ]]; then rm "$targets"; fi
+	if [[ -f "$TARGETS" ]]; then rm "$TARGETS"; fi
 	while IFS= read -r host; do
-		echo -e "$host" >> "$targets"
+		echo -e "$host" >> "$TARGETS"
 	done <<< "$hostsResult"
-	echo -e "$info""Written target list to $targets"
+	echo -e "${INFO}Written target list to $TARGETS"
 }
 
 
 unset targetsOverview
 OSScan() {
-	echo -e "$task""Getting OS information"
+	echo -e "${TASK}Getting OS information"
 	while IFS= read -r host; do
 		osscan=$(nmap "$host" -O --top-ports=20 -F --osscan-guess)
 #		filter=$(echo "$osscan" | grep OS | grep -v -e cpe | cut -d: -f2 | cut -d')' -f1 | head -n 1)
@@ -58,46 +58,46 @@ OSScan() {
 }
 
 quickScan() {
-	echo -e "$task""Running QUICK portscan"
-	echo -e "$heading""Quick portscan overview of $@\n""$normal" > "$fastlogname"
+	echo -e "${TASK}Running QUICK portscan"
+	echo -e "${HEADING}Quick portscan overview of $@\n${NC}" > "$fastlogname"
 	while IFS= read -r host; do
 		for line in "${targetsOverview[@]}"; do # Only runs if OSScan has been performed
 			if [[ "$line" == *"$host"* ]]; then
-				echo -e "\n\n""$heading""$line""$normal" >> "$fastlogname"
+				echo -e "\n\n${HEADING}$line${NC}" >> "$fastlogname"
 			fi
 		done
 		nmap "$host" -T5 -F -sV -sC >> "$fastlogname"
 	done <<< "$hostsResult"
-	echo -e "$info""Written quick scan log to $fastlogname"
+	echo -e "${INFO}Written quick scan log to $fastlogname"
 }
 
 detailedScan() {
-	echo -e "$task""Running DETAILED TCP portscan"
+	echo -e "${TASK}Running DETAILED TCP portscan"
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
 		logname="$hostip""$logSuffix"
 		output=$(nmap "$host" -T4 -p- -sV -sC -A --append-output -oN "$logname")
-		echo -e "$info""Outputting log: $logname"
+		echo -e "${INFO}Outputting log: $logname"
 	done <<< "$hostsResult"
 }
 
 udpScan() {
-	echo -e "$task""Running DETAILED UDP portscan"
+	echo -e "${TASK}Running DETAILED UDP portscan"
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
 		logname="$hostip""$logSuffix"
 		output=$(nmap "$host" -T4 -p53,47,48,88,123,137,161,514 -sU -sV --append-output -oN "$logname")
-		echo -e "$info""Outputting log: $logname"
+		echo -e "${INFO}Outputting log: $logname"
 	done <<< "$hostsResult"
 }
 
 stealthyScan() {
-	echo -e "$task""Running STEALTHY portscan"
+	echo -e "${TASK}Running STEALTHY portscan"
 	while IFS= read -r host; do
 		hostip=$(echo "$host" | tr '.' '_')
 		logname="$hostip""$logSuffix"
 		output=$(nmap "$host" --top-ports 50 -T2 -sS --append-output -oN "$logname")
-		echo -e "$info""Outputting log: $logname"
+		echo -e "${INFO}Outputting log: $logname"
 	done <<< "$hostsResult"
 }
 
@@ -125,11 +125,11 @@ main() {
 	done
 
 	targetsip=$(echo "$ips" | tr '.' '_' | tr '/' '#' | tr ' ' '+')
-	fastlogname="quick_""$targetsip""$logSuffix"
+	fastlogname="quick_""$TARGETSip""$logSuffix"
 
 
 	# Running
-	echo -e "$info""Scanning ip(s) $ips"
+	echo -e "${INFO}Scanning ip(s) $ips"
 
 	discovery "$ips"
 
@@ -152,7 +152,7 @@ main() {
 		less "$fastlogname"
 	fi
 
-	echo -e "$info""Done"
+	echo -e "${INFO}Done"
 }
 
 
