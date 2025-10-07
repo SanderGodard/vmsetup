@@ -34,7 +34,7 @@ discovery() {
 	#hostsResult=$(fping -ganq $1)
 	hostsResult=$(nmap -sn -T4 "$@" | grep "Nmap scan report for" | awk '{print $NF}')
 	count=$(echo "$hostsResult" | wc -l)
-	echo -e "${INFO}}Found $count targets"
+	echo -e "${INFO}Found $count targets"
 
 	if [[ -f "$TARGETS" ]]; then rm "$TARGETS"; fi
 	while IFS= read -r host; do
