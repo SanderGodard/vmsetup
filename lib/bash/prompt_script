@@ -8,7 +8,7 @@ EXIT_STATUS=$?
 # See 'man console_codes' for more details
 # Format: \[ \e[<style>;<fg_color>;<bg_color>m \]
 RED='\[\e[1;31m\]' # Bold Red
-GREEN='\[\e[1;32m\]' # Bold Green
+GREEN='\[\e[0;32m\]' # Bold Green
 BLUE='\[\e[1;34m\]' # Bold Blue
 YELLOW='\[\e[1;33m\]' # Bold Yellow
 PURPLE='\[\e[1;35m\]' # Bold Purple
@@ -47,8 +47,14 @@ parse_git_branch() {
 
 # Get shell level
 parse_shell_level() {
-	if [ $SHLVL -gt 1 ]; then
-		SHELL_LEVEL_SECTION="\n├ shell lvl: ${SHLVL}"
+	LIMIT=2
+	SHELL_LEVEL_SECTION=""
+	if [[ -v TMUX ]]; then
+		SHELL_LEVEL_SECTION="\n├ ${GREEN}Tmux${NC}"
+		LIMIT=$(( LIMIT + 1 ))
+	fi
+	if [ $SHLVL -ge $LIMIT ]; then
+		SHELL_LEVEL_SECTION="${SHELL_LEVEL_SECTION}\n├ shell lvl: ${SHLVL}"
 	fi
 }
 
