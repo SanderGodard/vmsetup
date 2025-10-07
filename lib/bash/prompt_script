@@ -143,3 +143,6 @@ PS1="╭${ERROR_STATUS_INDICATOR}─ ${RED}\u${NC}@\H${PROMPT_BODY}\n╰─${PRO
 
 PROMPT_COMMAND="source ~/.prompt_script"
 
+#Inspo:
+# https://starship.rs/config/#directory
+# Directory shortener, container, docker context, local IP?
