@@ -129,3 +129,8 @@ wificonfig() {
 note() {
 	echo -e "\n$*" >> notes
 }
+
+# Get current SSH sessions
+sshinfo() {
+	 ss -tnp 'sport = :22 or dport = :22' | grep ESTAB | tr ',' ' ' | awk '{print $7" "$4" -> "$5}'
+}
