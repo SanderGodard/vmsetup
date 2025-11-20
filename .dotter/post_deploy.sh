@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # Post deployment script after using dotter
-echo -e "[-] Running post-deploy script"
+echo "[-] Running post-deploy script"
 
 # Set bash as default for terminal
 if [ "$SHELL" = "/usr/bin/zsh" ]; then # Likely kali box
@@ -32,7 +32,7 @@ $(./generate-symlinks.sh) 2> /dev/null
 # Default position for rockyou in kali
 gunzip /usr/share/wordlists/rockyou.txt.gz
 # TMUX settings
-echo -e "set -g mouse on\n" >> $HOME/.tmux.conf
+echo "set -g mouse on\n" >> $HOME/.tmux.conf
 
 # XFCE settings
 echo "Using ./xfce4-customize.sh to set wallpaper and such"
@@ -40,6 +40,6 @@ echo "Using ./xfce4-customize.sh to set wallpaper and such"
 
 echo "Remember to update and upgrade"
 
-echo "[-] Opening bash" 
+echo "[-] Opening bash"
 # Opening bash
 bash
