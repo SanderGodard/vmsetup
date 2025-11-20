@@ -3,7 +3,6 @@
 # Capture the exit status of the *previous* command
 EXIT_STATUS=$?
 
-
 # Color definitions
 # See 'man console_codes' for more details
 # Format: \[ \e[<style>;<fg_color>;<bg_color>m \]
@@ -39,6 +38,13 @@ if [ -n "$force_color_prompt" ]; then
 	fi
 fi
 
+# Set title of bash, which is passed to alacritty then so on
+set_window_title() {
+	LAST_CMD=$(fc -ln -1 | sed 's/"/\\"/g' | xargs)
+	CWD=$(basename "$PWD")
+	echo -ne "\e]2;Terminal | ${CWD}: ${LAST_CMD}\a"
+	#${BASH_COMMAND%% *} \a"
+}
 
 # Returns the current branch and repository status (if any)
 parse_git_branch() {
@@ -128,6 +134,9 @@ generatePromptBody() {
 	fi
 }
 
+# Set window title
+#PROMPT_COMMAND=""
+trap 'set_window_title' DEBUG
 # Assign the function to PROMPT_COMMAND
 update_prompt_status
 setUserColor

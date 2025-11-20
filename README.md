@@ -3,15 +3,21 @@
 Using dotter to deploy bashrc and basic comfort in new temporary VMs
 
 ## Install:
+
+### Automatically
+Run the following command
+
+```bash
+curl https://raw.githubusercontent.com/SanderGodard/vmsetup/refs/heads/master/install.sh | bash
+```
+
+### Manually
 Check `.dotter/global.toml` for settings
 
 Edit the following:
 ```md
 [all]
 depends = ["bash", "style", "scripts"]
-
-[bash.variables]
-cwd = "~/Documents/genesis"
 ```
 
 Then deploy with settings from the toml file.
@@ -25,6 +31,9 @@ https://github.com/SuperCuber/dotter
  - Bashfiles like aliases and functions
  - Prompt for bash
  - Wallpaper
+ - Stops the xfce vm from falling asleep and locking
+ - Unzips rockyou
+ - Sets mouse in tmux
  - LightDM Greeter styling
  - Scripts
     - VibeCheck

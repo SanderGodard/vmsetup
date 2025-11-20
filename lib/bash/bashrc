@@ -100,4 +100,5 @@ fi
 
 
 # Default cd
-cd {{cwd}} # Endres i ~/.dotfiles/.dotter/global.toml
+STARTINGDIR="$HOME/Documents"
+cd "$STARTINGDIR"

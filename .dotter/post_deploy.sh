@@ -28,7 +28,16 @@ chmod +x ~/.prompt_script
 echo "Using ./generate-symlinks.sh to fix symlinks that dotter cannot"
 $(./generate-symlinks.sh) 2> /dev/null
 
-echo "Use ./xfce4-customize.sh to set wallpaper and such"
+# Config
+# Default position for rockyou in kali
+gunzip /usr/share/wordlists/rockyou.txt.gz
+# TMUX settings
+echo -e "set -g mouse on\n" >> $HOME/.tmux.conf
+
+# XFCE settings
+echo "Using ./xfce4-customize.sh to set wallpaper and such"
+./xfce4-customize.sh
+
 echo "Remember to update and upgrade"
 
 echo "[-] Opening bash" 

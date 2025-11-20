@@ -117,6 +117,7 @@ catdir() {
 
 # Tools shortcut, needs file in /usr/share/bash-completion/completions/tools
 tools() {
+	echo -e "~/Documents/tools/$1/$2 ${@:3}"
 	~/Documents/tools/"$1"/"$2" "${@:3}"
 }
 
@@ -133,4 +134,32 @@ note() {
 # Get current SSH sessions
 sshinfo() {
 	 ss -tnp 'sport = :22 or dport = :22' | grep ESTAB | tr ',' ' ' | awk '{print $7" "$4" -> "$5}'
+}
+
+# Change the new default dir
+changedir() {
+	local RCFILE="$HOME/.bashrc"
+	local NEWDIR="$(pwd)"
+    if [ -z "$1" ]; then
+        echo -e "Changing the STARTINGDIR in the $RCFILE to $
+        local NEWDIR="$(pwd)"
+    else
+            local NEWDIR="$1"
+        fi
+    local ESCAPED_DIR=$(echo "$NEWDIR" | sed 's/\//\\\//g')
+    #currentLine=$(grep STARTINGDIR "$RCFILE" | head -n 1
+#       sed -i "s/\$currentLine/STARTINGDIR=\"\$ESCAPED_DIR\"
+	# The sed command:
+    # 1. Searches for a line starting with 'STARTINGDIR='
+    # 2. Replaces the entire line with the new definition
+    # The -i flag performs an in-place edit directly on the f
+    # We use a non-standard delimiter (~) for sed to avoid co
+    sed -i -r "s|^STARTINGDIR=.*|STARTINGDIR=\"${ESCAPED_DIR}
+    if [ $? -eq 0 ]; then
+#        echo "Successfully updated STARTINGDIR $STARTINGDIR
+        # Source the file to apply the change immediately to
+        source "$RCFILE"
+    else
+        echo "Error: Failed to update $RCFILE. Please check t
+    fi
 }
