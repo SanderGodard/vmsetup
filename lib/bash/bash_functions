@@ -139,27 +139,29 @@ sshinfo() {
 # Change the new default dir
 changedir() {
 	local RCFILE="$HOME/.bashrc"
-	local NEWDIR="$(pwd)"
+    local NEWDIR="$(pwd)"
     if [ -z "$1" ]; then
-        echo -e "Changing the STARTINGDIR in the $RCFILE to $
+        echo -e "Changing the STARTINGDIR in the $RCFILE to $(pwd)"
         local NEWDIR="$(pwd)"
     else
-            local NEWDIR="$1"
-        fi
+	    local NEWDIR="$1"
+	fi
     local ESCAPED_DIR=$(echo "$NEWDIR" | sed 's/\//\\\//g')
-    #currentLine=$(grep STARTINGDIR "$RCFILE" | head -n 1
-#       sed -i "s/\$currentLine/STARTINGDIR=\"\$ESCAPED_DIR\"
+	#currentLine=$(grep STARTINGDIR "$RCFILE" | head -n 1)
+#	sed -i "s/\$currentLine/STARTINGDIR=\"\$ESCAPED_DIR\"/" "$RCFILE"
+
 	# The sed command:
     # 1. Searches for a line starting with 'STARTINGDIR='
     # 2. Replaces the entire line with the new definition
-    # The -i flag performs an in-place edit directly on the f
-    # We use a non-standard delimiter (~) for sed to avoid co
-    sed -i -r "s|^STARTINGDIR=.*|STARTINGDIR=\"${ESCAPED_DIR}
+    # The -i flag performs an in-place edit directly on the file.
+    # We use a non-standard delimiter (~) for sed to avoid conflicts with path slashes.
+    sed -i -r "s|^STARTINGDIR=.*|STARTINGDIR=\"${ESCAPED_DIR}\"|g" "$RCFILE"
+
     if [ $? -eq 0 ]; then
-#        echo "Successfully updated STARTINGDIR $STARTINGDIR
-        # Source the file to apply the change immediately to
+#        echo "Successfully updated STARTINGDIR $STARTINGDIR in $RCFILE to: STARTINGDIR="'"'"$NEWDIR"'"'
+        # Source the file to apply the change immediately to the current shell environment
         source "$RCFILE"
     else
-        echo "Error: Failed to update $RCFILE. Please check t
+        echo "Error: Failed to update $RCFILE. Please check the file contents and permissions."
     fi
 }

@@ -7,7 +7,7 @@ xrandr --listmonitors | awk '{print $4}' | tail -n $(( $( xrandr --listmonitors 
 done
 
 # Turning off screensaver and locking after time
-xfconf-query -c xfce4-screensaver -p /saver/enabled -s false
-xfconf-query -c xfce4-screensaver -p /lock/enabled -s false
+xfconf-query -c xfce4-screensaver -n -t bool -p /saver/enabled -s false
+xfconf-query -c xfce4-screensaver -n -t bool -p /lock/enabled -s false
 
 echo -e "Finished"
